@@ -1,0 +1,26 @@
+[
+  {
+    "id": 1,
+    "title": "Understanding JavaScript Closures",
+    "author": "John Doe",
+    "content": "Closures are a powerful feature in JavaScript that allow functions to access variables from an outer scope...",
+    "tags": ["JavaScript", "Closures", "Programming"],
+    "createdAt": "2025-06-20T10:00:00Z"
+  },
+  {
+    "id": 2,
+    "title": "A Beginner's Guide to React",
+    "author": "Jane Smith",
+    "content": "React is a popular JavaScript library for building user interfaces. In this guide, we cover the basics...",
+    "tags": ["React", "Frontend", "Web Development"],
+    "createdAt": "2025-06-18T15:30:00Z"
+  },
+  {
+    "id": 3,
+    "title": "Tips for Writing Clean Code",
+    "author": "Alex Johnson",
+    "content": "Writing clean, maintainable code is essential for any developer. Here are some best practices to follow...",
+    "tags": ["Clean Code", "Best Practices", "Development"],
+    "createdAt": "2025-06-15T08:45:00Z"
+  }
+]

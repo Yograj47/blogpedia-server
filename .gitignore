@@ -1,0 +1,14 @@
+# Node modules for both frontend & backend
+**/node_modules
+
+# Env files
+**/.env
+
+# Logs
+**/logs
+**/*.log
+
+# Optional system files
+.DS_Store
+Thumbs.db
+
