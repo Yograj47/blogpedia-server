@@ -1,4 +1,6 @@
 const blog = require("../model/blog");
+const UploadOnCloud = require("../config/Cloudinary");
+const fs = require("fs");
 
 /** * @desc Get all blogs
  * @route GET /api/blogs
@@ -55,16 +57,35 @@ const getLatestBlogs = async (req, res) => {
  */
 const createBlog = async (req, res) => {
   try {
-    const blog = await blog.create(req.body);
+    const file = req.file;
+
+    // Upload image if provided
+    let imageUrl = "";
+    let cloudinaryId = "";
+
+    if (file) {
+      const uploadResult = await UploadOnCloud(file.path);
+      imageUrl = uploadResult.secure_url;
+      cloudinaryId = uploadResult.public_id;
+      fs.unlinkSync(file.path); // remove temp image
+    }
+
+    // Create blog with image fields
+    const newBlog = await blog.create({
+      ...req.body,
+      imageUrl,
+      cloudinaryId,
+    });
+
     res.status(201).json({
       success: true,
-      data: blog,
+      data: newBlog,
       message: "Blog created successfully",
     });
   } catch (error) {
     res.status(500).json({
       success: false,
-      message: error,
+      message: error.message || "Server Error",
     });
   }
 };

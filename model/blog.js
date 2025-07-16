@@ -26,6 +26,39 @@ const BlogSchema = new mongoose.Schema(
       trim: true,
       maxlength: [50, "Category cannot exceed 50 characters"],
     },
+
+    imageUrl: {
+      type: String,
+      required: [true, "Image URL is required"],
+      trim: true,
+      validate: {
+        validator: function (v) {
+          return /^https?:\/\/.+\.(jpg|jpeg|png|webp|gif|svg)$/.test(v);
+        },
+        message: "Please enter a valid image URL",
+      },
+    },
+
+    cloudinaryId: {
+      type: String,
+      required: [true, "Cloudinary public ID is required"],
+      trim: true,
+    },
+
+    likes: {
+      type: Number,
+      default: 0,
+    },
+
+    views: {
+      type: Number,
+      default: 0,
+    },
+
+    comments: {
+      type: Number,
+      default: 0,
+    },
   },
   { timestamps: true }
 );

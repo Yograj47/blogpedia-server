@@ -8,7 +8,7 @@ const connectionDb = require("./config/Connection");
 app.use(express.json());
 app.use(
   cors({
-    origin: "*",
+    origin: process.env.CORS_ORIGIN || "*",
     // ["http://localhost:5173", "https://your-vercel-app.vercel.app"],
     methods: ["GET", "POST", "PUT", "DELETE"],
   })
@@ -18,11 +18,20 @@ app.use(
 const blogRoutes = require("./routes/blog");
 const contactRoutes = require("./routes/contact");
 
-app.use("/api/blogs", blogRoutes);
-app.use("/api/contact", contactRoutes);
+// Health Check Route
+app.get("/", (req, res) => {
+  res.status(200).json({
+    success: "Server running",
+    status: true,
+  });
+});
+
+// API Routes
+app.use("/api/v1/blog", blogRoutes);
+app.use("/api/v1/contact", contactRoutes);
 
 // Start Server
-const PORT = process.env.PORT || 3000;
+const PORT = process.env.PORT;
 const start = async () => {
   try {
     await connectionDb(process.env.MONGOOSE_URI);
