@@ -8,23 +8,30 @@ const BlogSchema = new mongoose.Schema(
       trim: true,
       maxlength: [100, "Title cannot exceed 100 characters"],
     },
+
     content: {
-      type: String,
-      required: [true, "Content is required"],
-      trim: true,
-      maxlength: [5000, "Content cannot exceed 5000 characters"],
+      htmlContent: {
+        type: String,
+        required: [true, "HTML content is required"],
+        maxlength: [20000, "HTML content is too long"],
+      },
+      jsonContent: {
+        type: mongoose.Schema.Types.Mixed, // Stores Tiptap JSON structure
+        required: [true, "JSON content is required"],
+      },
     },
+
     author: {
       type: String,
-      required: [true, "Author is required"],
-      trim: true,
-      maxlength: [50, "Author name cannot exceed 50 characters"],
+      default: "Admin",
     },
+
     category: {
       type: String,
       required: [true, "Category is required"],
       trim: true,
       maxlength: [50, "Category cannot exceed 50 characters"],
+      enum: ["Technology", "Lifestyle", "Travel", "Food", "Other"],
     },
 
     imageUrl: {
@@ -35,7 +42,7 @@ const BlogSchema = new mongoose.Schema(
         validator: function (v) {
           return /^https?:\/\/.+\.(jpg|jpeg|png|webp|gif|svg)$/.test(v);
         },
-        message: "Please enter a valid image URL",
+        message: "Please enter a valid image URL (jpg, png, etc.)",
       },
     },
 
@@ -43,6 +50,11 @@ const BlogSchema = new mongoose.Schema(
       type: String,
       required: [true, "Cloudinary public ID is required"],
       trim: true,
+    },
+
+    tags: {
+      type: [String],
+      default: [],
     },
 
     likes: {

@@ -6,15 +6,15 @@ const {
   getAllBlogs,
   createBlog,
   getBlogById,
-  updateBlog,
-  deleteBlog,
-  // bulkCreateBlogs,
   getLatestBlogs,
+  updateBlogById,
 } = require("../controller/blog");
 
 router.route("/").get(getAllBlogs).post(upload.single("file"), createBlog); // Route to get all blogs and create a new blog
-// router.route("/bulk").post(bulkCreateBlogs); // Testing route for bulk creation
 router.route("/latest").get(getLatestBlogs); // Route to get latest blogs
-router.route("/:id").get(getBlogById).patch(updateBlog).delete(deleteBlog); // CRUD operations for individual blog posts
+router
+  .route("/:id")
+  .get(getBlogById)
+  .patch(upload.single("file"), updateBlogById); // Route to get a blog by ID
 
 module.exports = router;

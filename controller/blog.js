@@ -1,9 +1,8 @@
 const blog = require("../model/blog");
-const UploadOnCloud = require("../config/Cloudinary");
-const fs = require("fs");
+const handleImageUpload = require("../utils/handleImageUpload.js");
 
 /** * @desc Get all blogs
- * @route GET /api/blogs
+ * @route GET /api/v1/blog
  * @access Public
  */
 const getAllBlogs = async (req, res) => {
@@ -31,7 +30,7 @@ const getAllBlogs = async (req, res) => {
 };
 
 /** * @desc Get all blogs
- * @route GET /api/blogs
+ * @route GET /api/v1/blog/latest
  * @access Public
  */
 const getLatestBlogs = async (req, res) => {
@@ -51,9 +50,10 @@ const getLatestBlogs = async (req, res) => {
   }
 };
 
-/** * @desc Create a new blog
- * @route POST /api/blogs
- * @access Public
+/**
+ * @desc    Create a new blog
+ * @route   POST /api/v1/blog
+ * @access  Public
  */
 const createBlog = async (req, res) => {
   try {
@@ -63,16 +63,32 @@ const createBlog = async (req, res) => {
     let imageUrl = "";
     let cloudinaryId = "";
 
-    if (file) {
-      const uploadResult = await UploadOnCloud(file.path);
-      imageUrl = uploadResult.secure_url;
-      cloudinaryId = uploadResult.public_id;
-      fs.unlinkSync(file.path); // remove temp image
+    const { secure_url, public_id } = await handleImageUpload(file);
+    imageUrl = secure_url;
+    cloudinaryId = public_id;
+
+    // Parse JSON stringified content if coming via multipart/form-data
+    let parsedContent;
+    if (typeof req.body.content === "string") {
+      try {
+        parsedContent = JSON.parse(req.body.content);
+      } catch (err) {
+        return res.status(400).json({
+          success: false,
+          message: "Invalid content format. Must be valid JSON.",
+        });
+      }
+    } else {
+      parsedContent = req.body.content;
     }
 
-    // Create blog with image fields
+    // Build blog object
     const newBlog = await blog.create({
-      ...req.body,
+      title: req.body.title,
+      content: parsedContent,
+      author: req.body.author || "Admin",
+      category: req.body.category,
+      tags: req.body.tags ? JSON.parse(req.body.tags) : [], // if tags come as string
       imageUrl,
       cloudinaryId,
     });
@@ -90,29 +106,8 @@ const createBlog = async (req, res) => {
   }
 };
 
-/**
- * @desc   Create multiple blogs at once
- * @route  POST /api/blogs/bulk
- * @access Public
- */
-const bulkCreateBlogs = async (req, res) => {
-  try {
-    const blogs = await blog.insertMany(req.body);
-    res.status(201).json({
-      success: true,
-      data: blogs,
-      message: "Multiple blogs created successfully",
-    });
-  } catch (error) {
-    res.status(500).json({
-      success: false,
-      message: error.message || "Server Error",
-    });
-  }
-};
-
 /** * @desc Get a blog by ID
- * @route GET /api/blogs/:id
+ * @route GET /api/v1/blog/:id
  * @access Public
  *  @param {string} id - The ID of the blog to retrieve
  */
@@ -139,19 +134,56 @@ const getBlogById = async (req, res) => {
   }
 };
 
-/** * @desc Update a blog by ID
- * @route PUT /api/blogs/:id
+/** * @desc patch/put a blog by ID
+ * @route PATCH /api/v1/blog/:id
  * @access Public
- * @param {string} id - The ID of the blog to update
+ *  @param {string} id - The ID of the blog to update
  */
-const updateBlog = async (req, res) => {
+const updateBlogById = async (req, res) => {
   try {
     const blogId = req.params.id;
-    const blogData = await blog.findByIdAndUpdate({ _id: blogId }, req.body, {
-      new: true,
-      runValidators: true,
-    });
-    if (!blogData) {
+    const existingBlog = await blog.findById(blogId);
+    if (!existingBlog) {
+      return res
+        .status(404)
+        .json({ success: false, message: "Blog not found" });
+    }
+
+    let imageUrl = existingBlog.imageUrl;
+    let cloudinaryId = existingBlog.cloudinaryId;
+
+    if (req.file) {
+      const uploadResult = await handleImageUpload(
+        req.file,
+        existingBlog.cloudinaryId
+      );
+      imageUrl = uploadResult.secure_url;
+      cloudinaryId = uploadResult.public_id;
+    }
+
+    const parsedTags = req.body.tags
+      ? JSON.parse(req.body.tags)
+      : existingBlog.tags;
+    const parsedContent =
+      typeof req.body.content === "string"
+        ? JSON.parse(req.body.content)
+        : req.body.content;
+
+    // Now update blog
+    const updatedBlog = await blog.findByIdAndUpdate(
+      blogId,
+      {
+        title: req.body.title,
+        content: parsedContent,
+        category: req.body.category,
+        tags: parsedTags,
+        imageUrl,
+        cloudinaryId,
+      },
+      { new: true, runValidators: true }
+    );
+
+    if (!updatedBlog) {
       return res.status(404).json({
         success: false,
         message: "Blog not found",
@@ -159,40 +191,13 @@ const updateBlog = async (req, res) => {
     }
     res.status(200).json({
       success: true,
-      data: blogData,
+      data: updatedBlog,
       message: "Blog updated successfully",
     });
   } catch (error) {
     res.status(500).json({
       success: false,
-      message: error,
-    });
-  }
-};
-
-/** * @desc Delete a blog by ID
- * @route PUT /api/blogs/:id
- * @access Public
- * @param {string} id - The ID of the blog to update
- */
-const deleteBlog = async (req, res) => {
-  try {
-    const blogId = req.params.id;
-    const blogData = await blog.findByIdAndDelete({ _id: blogId });
-    if (!blogData) {
-      return res.status(404).json({
-        success: false,
-        message: "Blog not found",
-      });
-    }
-    res.status(200).json({
-      success: true,
-      message: "Blog deleted successfully",
-    });
-  } catch (error) {
-    res.status(500).json({
-      success: false,
-      message: error,
+      message: error.message || "Server Error",
     });
   }
 };
@@ -202,7 +207,5 @@ module.exports = {
   getLatestBlogs,
   createBlog,
   getBlogById,
-  updateBlog,
-  deleteBlog,
-  bulkCreateBlogs,
+  updateBlogById,
 };
