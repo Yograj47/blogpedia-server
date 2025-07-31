@@ -11,17 +11,19 @@ const connectionDb = require("./config/Connection");
 app.use(express.json());
 app.use(
   cors({
-    origin: "http://localhost:5173", // Adjust this to your frontend URL
+    origin: process.env.CORS_ORIGIN,
     methods: ["GET", "POST", "PUT", "DELETE"],
   })
 );
 
 //routes
-const blogRoutes = require("./routes/blog");
-const contactRoutes = require("./routes/contact");
+// const blogRoutes = require("./routes/blog");
+// const contactRoutes = require("./routes/contact");
+const userRoute = require("./routes/user");
 
-app.use("/api/blogs", blogRoutes);
-app.use("/api/contact", contactRoutes);
+// app.use("/api/blogs", blogRoutes);
+// app.use("/api/contact", contactRoutes);
+app.use("/api/v1/user", userRoute);
 
 const start = async () => {
   try {
