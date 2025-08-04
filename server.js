@@ -2,7 +2,7 @@ require("dotenv").config();
 
 const express = require("express");
 const cors = require("cors");
-const PORT = 3000;
+const PORT = 5000;
 
 const app = express();
 const connectionDb = require("./config/Connection");
@@ -16,14 +16,11 @@ app.use(
   })
 );
 
-//routes
-// const blogRoutes = require("./routes/blog");
-// const contactRoutes = require("./routes/contact");
 const userRoute = require("./routes/user");
+const imageRoute = require("./routes/image");
 
-// app.use("/api/blogs", blogRoutes);
-// app.use("/api/contact", contactRoutes);
 app.use("/api/v1/user", userRoute);
+app.use("/api/v1/image", imageRoute);
 
 const start = async () => {
   try {
