@@ -18,9 +18,11 @@ app.use(
 
 const userRoute = require("./routes/user");
 const imageRoute = require("./routes/image");
+const blogRoute = require("./routes/blog");
 
 app.use("/api/v1/user", userRoute);
 app.use("/api/v1/image", imageRoute);
+app.use("/api/v1/blog", blogRoute);
 
 const start = async () => {
   try {
