@@ -2,6 +2,7 @@ const User = require("../model/user");
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
 
+// POST: /api/v1/users/register
 const createUser = async (req, res) => {
   try {
     const { name, email, password, role } = req.body;
@@ -33,6 +34,7 @@ const createUser = async (req, res) => {
   }
 };
 
+// POST: /api/v1/users/login
 const userLogin = async (req, res) => {
   const { email, password } = req.body;
 
@@ -43,16 +45,12 @@ const userLogin = async (req, res) => {
 
     const user = await User.findOne({ email });
     if (!user) {
-      return res
-        .status(404)
-        .json({ error: "Please try to login with correct credentials" });
+      return res.status(404).json({ error: "Invalid credentials" });
     }
 
     const isMatch = await bcrypt.compare(password, user.password);
     if (!isMatch) {
-      return res
-        .status(401)
-        .json({ error: "Please try to login with correct credentials" });
+      return res.status(401).json({ error: "Invalid credentials" });
     }
 
     const payload = {

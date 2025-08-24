@@ -16,20 +16,18 @@ app.use(
   })
 );
 
-const userRoute = require("./routes/user");
-const imageRoute = require("./routes/image");
-const blogRoute = require("./routes/blog");
+const userRoute = require("./routes/userRoute");
+const imageRoute = require("./routes/imageRoute");
+const blogRoute = require("./routes/blogRoute");
 
-app.use("/api/v1/user", userRoute);
-app.use("/api/v1/image", imageRoute);
-app.use("/api/v1/blog", blogRoute);
+app.use("/api/v1/users", userRoute);
+app.use("/api/v1/images", imageRoute);
+app.use("/api/v1/blogs", blogRoute);
 
 const start = async () => {
   try {
     await connectionDb(process.env.MONGOOSE_URI);
-    app.listen(PORT, () =>
-      console.log(`Server running: http://localhost:${PORT}`)
-    );
+    app.listen(PORT, () => console.log(`Server running on:${PORT}`));
   } catch (error) {
     console.error("Error starting the server:", error);
   }

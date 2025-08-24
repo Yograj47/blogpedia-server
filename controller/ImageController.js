@@ -1,6 +1,7 @@
 const handleImageUpload = require("../utils/handleImageUpload");
 const cloudinary = require("cloudinary").v2;
 
+// POST: /api/v1/users/upload
 const uploadHandler = async (req, res) => {
   const file = req.file;
   console.log(file);
@@ -14,6 +15,7 @@ const uploadHandler = async (req, res) => {
   }
 };
 
+// DELETE: /api/v1/users//delete/:public_id
 const deleteHandler = async (req, res) => {
   try {
     const publicId = decodeURIComponent(req.params.public_id);

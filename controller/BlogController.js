@@ -1,5 +1,6 @@
 const Blog = require("../model/blog");
 
+// POST: /api/v1/blogs/create
 const createBlog = async (req, res) => {
   const { title, author, tags, category, content, coverImage } = req.body;
 
